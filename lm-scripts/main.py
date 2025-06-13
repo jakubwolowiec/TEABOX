@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from litellm import completion
 import os
 import json
+import requests
 
 app = FastAPI()
 

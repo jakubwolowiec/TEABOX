@@ -7,8 +7,6 @@ import requests
 app = FastAPI()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-STEAM_API_KEY = "68109B45F1554772878485899C23285C"
 REVIEWS_PER_GAME = 10
 
 
@@ -54,31 +52,31 @@ async def generate(request: Request):
         2. Be concise.
         3. Use consistent formatting of pros and cons.
         4. Omit redundant pros and cons.
-        5. Ignore reviews containing html tags."""
+        5. Ignore reviews containing html tags.
+        6. Give only JSON file as a response."""
 
         data = get_reviews_for_app(AppID)
         if data and 'reviews' in data:
             reviews = """ """
 
             for review in data['reviews']:
-                reviews += review.get('\n', 'review')
+                reviews += f"\n {review['review']}"
+
+            # Call Groq API
+            response = completion(
+                model="groq/llama3-70b-8192",
+                messages=[{
+                    "role": "system",
+                    "content": system_prompt
+                },
+                    {
+                        "role": "user",
+                        "content": f"Reviews: {reviews}"
+                    }],
+                api_key=GROQ_API_KEY
+            )
+            return {"response": response.choices[0].message.content}
         else:
             return {"error": "No reviews for this game"}
-
-        # Call Groq API
-        response = completion(
-            model="groq/llama3-70b-8192",
-            messages=[{
-                "role": "system",
-                "content": system_prompt
-            },
-                {
-                    "role": "user",
-                    "content": f"Reviews: {reviews}"
-                }],
-            api_key=GROQ_API_KEY
-        )
-        return {"response": response.choices[0].message.content}
-
     except Exception as e:
         return {"error": str(e)}

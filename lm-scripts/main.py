@@ -33,8 +33,7 @@ async def generate(request: Request):
     try:
         # Get raw JSON body
         body = await request.json()
-        #AppID = body.get("AppID")
-        AppID = 1028310
+        AppID = body.get("AppID")
 
         pros_fields = ",\n    ".join([f'"pro{i}": ""' for i in range(1, 5)])
         cons_fields = ",\n    ".join([f'"con{i}": ""' for i in range(1, 5)])
@@ -78,7 +77,6 @@ async def generate(request: Request):
                 }],
             api_key=GROQ_API_KEY
         )
-        print(str(response.choices[0].message.content)) #test
         return {"response": response.choices[0].message.content}
 
     except Exception as e:
